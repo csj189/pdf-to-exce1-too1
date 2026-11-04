@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF转Excel在线工具 - 免费将PDF表格转为Excel表格（无需注册）</title>
+<meta name="description" content="免费的PDF转Excel在线转换工具，无需注册安装，3秒将PDF表格提取为Excel(.xlsx)文件。支持多页PDF、手机和电脑，文件不上传服务器，隐私安全。PDF转Excel、PDF转表格、PDF提取表格就选这里。">
+<meta name="keywords" content="PDF转Excel,PDF转Excel在线,PDF转表格,PDF提取表格,PDF转xlsx,免费PDF转Excel,扫描件转Excel,PDF转Excel工具,在线PDF转Excel">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="PDF转Excel在线工具 - 免费将PDF表格转为Excel">
+<meta property="og:description" content="免费在线PDF转Excel，无需注册，3秒导出xlsx表格，文件不上传服务器。">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="zh_CN">
+<link rel="canonical" href="https://ac4b77929db1e5366.app.workbuddy.host/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "PDF转Excel在线工具",
+  "description": "免费将PDF表格转换为Excel(.xlsx)文件的在线工具",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Web",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "CNY"},
+  "FAQPage": {
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type":"Question","name":"PDF转Excel在线工具安全吗？","acceptedAnswer":{"@type":"Answer","text":"安全。本工具在浏览器本地运行，文件不会上传到任何服务器，转换过程全程在您的设备上完成。"}},
+      {"@type":"Question","name":"扫描件PDF能转Excel吗？","acceptedAnswer":{"@type":"Answer","text":"文本型PDF可直接转换。图片型扫描件需先进行OCR文字识别，本工具暂不支持图片文字识别，建议使用文本型PDF。"}},
+      {"@type":"Question","name":"PDF转Excel需要付费吗？","acceptedAnswer":{"@type":"Answer","text":"完全免费，无需注册，无需安装，不限次数。"}}
+    ]
+  }
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{--primary:#2563eb;--primary-dark:#1d4ed8;--bg:#f8fafc;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--green:#16a34a;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+  .container{max-width:900px;margin:0 auto;padding:24px 16px 60px;}
+  header{text-align:center;padding:32px 0 8px;}
+  header h1{font-size:28px;margin-bottom:8px;}
+  header h1 span{color:var(--primary);}
+  header p{color:var(--muted);font-size:15px;}
+  .badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+  .badge{background:#eff6ff;color:var(--primary);font-size:12px;padding:4px 12px;border-radius:999px;}
+  .upload-card{background:var(--card);border:2px dashed var(--border);border-radius:16px;padding:48px 24px;text-align:center;margin-top:24px;transition:.2s;cursor:pointer;}
+  .upload-card.dragover{border-color:var(--primary);background:#eff6ff;}
+  .upload-card .icon{font-size:48px;}
+  .upload-card h2{font-size:18px;margin:12px 0 6px;}
+  .upload-card p{color:var(--muted);font-size:14px;}
+  .btn{display:inline-block;background:var(--primary);color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:16px;cursor:pointer;margin-top:18px;}
+  .btn:hover{background:var(--primary-dark);}
+  .btn:disabled{background:#94a3b8;cursor:not-allowed;}
+  .btn-green{background:var(--green);}
+  .btn-green:hover{background:#15803d;}
+  #fileInput{display:none;}
+  .status{margin-top:16px;text-align:center;color:var(--muted);font-size:14px;min-height:20px;}
+  .progress-wrap{max-width:420px;margin:10px auto 0;background:var(--border);border-radius:999px;height:8px;overflow:hidden;display:none;}
+  .progress-bar{height:100%;background:var(--primary);width:0%;transition:width .3s;}
+  .result{margin-top:28px;display:none;}
+  .result-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+  .result-head h3{font-size:17px;}
+  .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:420px;}
+  table{border-collapse:collapse;width:100%;font-size:13px;}
+  td,th{border:1px solid var(--border);padding:6px 10px;white-space:nowrap;text-align:left;}
+  th{background:#f1f5f9;position:sticky;top:0;}
+  .sheet-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .sheet-tab{padding:6px 14px;border-radius:8px;background:#e2e8f0;font-size:13px;cursor:pointer;border:none;}
+  .sheet-tab.active{background:var(--primary);color:#fff;}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:40px;}
+  .step{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;}
+  .step .num{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:10px;}
+  .step h4{font-size:15px;margin-bottom:6px;}
+  .step p{font-size:13px;color:var(--muted);line-height:1.6;}
+  footer{text-align:center;color:var(--muted);font-size:12px;margin-top:48px;line-height:1.8;}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>PDF <span>→</span> Excel 在线转换</h1>
+    <p>免费 · 无需注册 · 文件不上传服务器，全程在您的浏览器内完成</p>
+    <div class="badges">
+      <span class="badge">🔒 隐私安全</span>
+      <span class="badge">⚡ 秒级转换</span>
+      <span class="badge">📄 支持多页</span>
+      <span class="badge">📱 手机可用</span>
+    </div>
+  </header>
+
+  <div class="upload-card" id="dropZone">
+    <div class="icon">📁</div>
+    <h2>点击选择 或 拖拽 PDF 文件到此处</h2>
+    <p>仅支持 .pdf 格式，建议单文件 50 页以内</p>
+    <button class="btn" type="button">选择 PDF 文件</button>
+    <input type="file" id="fileInput" accept="application/pdf">
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="result" id="result">
+    <div class="result-head">
+      <h3 id="resultTitle">转换结果预览</h3>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-green" id="downloadBtn" style="margin-top:0;padding:10px 24px;">⬇ 下载 Excel (.xlsx)</button>
+        <button class="btn" id="resetBtn" style="margin-top:0;padding:10px 24px;background:#64748b;">重新转换</button>
+      </div>
+    </div>
+    <div class="sheet-tabs" id="sheetTabs"></div>
+    <div class="table-wrap"><table id="previewTable"></table></div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="num">1</div><h4>上传 PDF</h4><p>点击或拖拽，选择需要转换的 PDF 文件，文本型 PDF 效果最佳。</p></div>
+    <div class="step"><div class="num">2</div><h4>智能识别</h4><p>自动按行、按列识别表格结构，多页 PDF 每页生成一个工作表。</p></div>
+    <div class="step"><div class="num">3</div><h4>下载 Excel</h4><p>点击下载按钮，获取标准 .xlsx 文件，可直接用 WPS / Office 打开编辑。</p></div>
+  </div>
+
+  <footer>
+  <section class="seo" style="max-width:760px;margin:40px auto 0;padding:0 16px;color:var(--muted);font-size:13px;line-height:1.9;">
+    <h2 style="font-size:16px;color:var(--text);margin-bottom:10px;">PDF转Excel在线工具 - 免费、安全、无需注册</h2>
+    <p>这是一个完全免费的 PDF转Excel 在线工具，帮助你把 PDF 中的表格快速提取为 Excel(.xlsx) 文件。无论是财务报表、账单、工资条、物流单据还是课程表，只需上传 PDF，即可在几秒内得到可编辑的 Excel 表格，告别手动复制粘贴。</p>
+    <h3 style="font-size:15px;color:var(--text);margin:14px 0 6px;">为什么选择本 PDF转Excel 工具？</h3>
+    <ul style="padding-left:18px;">
+      <li><strong>完全免费</strong>：无需注册、无需安装软件、不限使用次数。</li>
+      <li><strong>隐私安全</strong>：文件在浏览器本地完成转换，不上传到任何服务器。</li>
+      <li><strong>多端可用</strong>：电脑、手机、平板均可使用，随时随地处理文件。</li>
+      <li><strong>支持多页</strong>：多页 PDF 会自动拆分为多个 Excel 工作表。</li>
+    </ul>
+    <h3 style="font-size:15px;color:var(--text);margin:14px 0 6px;">如何使用 PDF转Excel？</h3>
+    <ol style="padding-left:18px;">
+      <li>点击上传区或拖拽，选择要转换的 PDF 文件。</li>
+      <li>工具自动识别表格结构，逐页解析。</li>
+      <li>预览转换结果，点击"下载 Excel"即可保存 .xlsx 文件。</li>
+    </ol>
+    <h3 style="font-size:15px;color:var(--text);margin:14px 0 6px;">PDF转Excel 常见问题</h3>
+    <p><strong>PDF转Excel会乱吗？</strong> 文本型 PDF 转换效果最佳，表格结构清晰时几乎无损还原。若表格过于复杂，可先用 PDF 编辑器优化结构。</p>
+    <p><strong>扫描件能转 Excel 吗？</strong> 本工具针对文本型 PDF，图片扫描件需先进行 OCR 识别文字后再转换。</p>
+    <p><strong>文件会泄露吗？</strong> 不会。所有处理均在您的浏览器本地进行，文件不会离开您的设备。</p>
+  </section>
+  <footer>
+    PDF转Excel在线工具 · 本工具在浏览器本地运行，文件不会上传至任何服务器<br>
+    扫描件（图片型PDF）暂不支持文字识别，建议使用文本型PDF
+  </footer>
+</div>
+
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+const statusEl = document.getElementById("status");
+const progressWrap = document.getElementById("progressWrap");
+const progressBar = document.getElementById("progressBar");
+const resultEl = document.getElementById("result");
+const sheetTabs = document.getElementById("sheetTabs");
+const previewTable = document.getElementById("previewTable");
+const downloadBtn = document.getElementById("downloadBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+let workbook = null;
+let currentSheet = null;
+
+dropZone.addEventListener("click", () => fileInput.click());
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragover"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault(); dropZone.classList.remove("dragover");
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+function setStatus(t){ statusEl.textContent = t; }
+function setProgress(p){ progressWrap.style.display = p===null ? "none":"block"; progressBar.style.width = p+"%"; }
+
+async function handleFile(file){
+  if (!file.name.toLowerCase().endsWith(".pdf")){ setStatus("✘ 请选择 PDF 格式的文件"); return; }
+  setStatus("正在读取文件：" + file.name);
+  setProgress(5);
+  try{
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+    workbook = XLSX.utils.book_new();
+    const total = pdf.numPages;
+    let previewRows = [];
+    for (let i=1;i<=total;i++){
+      setStatus(`正在解析第 ${i} / ${total} 页…`);
+      setProgress(Math.round(5 + 85*i/total));
+      const page = await pdf.getPage(i);
+      const tc = await page.getTextContent();
+      const rows = buildRows(tc.items);
+      const aoa = rows.map(r => r.cells);
+      if (aoa.length === 0) aoa.push(["（本页未识别到文本）"]);
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+      XLSX.utils.book_append_sheet(workbook, ws, "第" + i + "页");
+      if (i === 1) previewRows = aoa;
+    }
+    setProgress(100);
+    setStatus(`✔ 转换完成！共 ${total} 页，点击下方按钮下载 Excel`);
+    renderTabs(Object.keys(workbook.Sheets), workbook.Sheets);
+    resultEl.style.display = "block";
+    resultEl.scrollIntoView({behavior:"smooth"});
+  }catch(err){
+    console.error(err);
+    setStatus("✘ 解析失败：" + (err.message || "文件可能已损坏或加密，请换一个文件试试"));
+  }finally{
+    setTimeout(()=>setProgress(null), 800);
+  }
+}
+
+// 按纵坐标聚行、横坐标聚列
+function buildRows(items){
+  const lines = [];
+  items.filter(it => it.str && it.str.trim() !== "").forEach(it => {
+    const y = Math.round(it.transform[5] / 3) * 3;
+    let line = lines.find(l => Math.abs(l.y - y) <= 3);
+    if (!line){ line = {y, cells:[]}; lines.push(line); }
+    line.cells.push({x: it.transform[4], str: it.str.trim()});
+  });
+  lines.sort((a,b) => b.y - a.y);
+  return lines.map(line => {
+    line.cells.sort((a,b) => a.x - b.x);
+    const cols = [];
+    line.cells.forEach(c => {
+      const last = cols[cols.length-1];
+      if (last && c.x - last.endX < 8){ last.str += (c.x - last.endX > 2 ? " " : "") + c.str; last.endX = c.x + c.str.length*5; }
+      else cols.push({str:c.str, startX:c.x, endX:c.x + c.str.length*5});
+    });
+    return {cells: cols.map(c=>c.str)};
+  });
+}
+
+function renderTabs(names, sheets){
+  sheetTabs.innerHTML = "";
+  names.forEach((n, idx) => {
+    const b = document.createElement("button");
+    b.className = "sheet-tab" + (idx===0 ? " active":"");
+    b.textContent = n;
+    b.onclick = () => {
+      sheetTabs.querySelectorAll(".sheet-tab").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      renderPreview(sheets[n]);
+    };
+    sheetTabs.appendChild(b);
+  });
+  renderPreview(sheets[names[0]]);
+}
+
+function renderPreview(ws){
+  const aoa = XLSX.utils.sheet_to_json(ws, {header:1, defval:""});
+  const maxC = Math.min(10, Math.max(...aoa.map(r=>r.length), 1));
+  let html = "<tr>" + Array.from({length:maxC},(_,i)=>`<th>列${i+1}</th>`).join("") + "</tr>";
+  aoa.slice(0,50).forEach(r => {
+    html += "<tr>" + Array.from({length:maxC},(_,i)=>`<td>${escapeHtml(String(r[i] ?? ""))}</td>`).join("") + "</tr>";
+  });
+  previewTable.innerHTML = html;
+}
+
+function escapeHtml(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+downloadBtn.addEventListener("click", () => {
+  if (!workbook) return;
+  XLSX.writeFile(workbook, "转换结果.xlsx");
+});
+
+resetBtn.addEventListener("click", () => {
+  workbook = null;
+  resultEl.style.display = "none";
+  fileInput.value = "";
+  setStatus("");
+});
+</script>
+</body>
+</html>
